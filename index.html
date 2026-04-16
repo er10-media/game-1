@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Угадай бизнес-модель</title>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0A0E1A;
+  --surface: #111827;
+  --card:    #161D2E;
+  --border:  #1E2A40;
+  --teal:    #00E5C3;
+  --orange:  #FF8C38;
+  --red:     #FF4560;
+  --green:   #00C896;
+  --blue:    #3D8EFF;
+  --gold:    #FFD166;
+  --text:    #E8EDF5;
+  --muted:   #5A6A85;
+  --dim:     #2A3550;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: 'Geologica', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND MESH ─────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 0%, rgba(0,229,195,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 80% 100%, rgba(61,142,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 30% at 50% 50%, rgba(255,140,56,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── SCREENS ─────────────────────────────────────── */
+.screen {
+  display: none;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+.screen.active { display: flex; flex-direction: column; }
+
+/* ── INTRO ───────────────────────────────────────── */
+#intro {
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.intro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,229,195,0.08);
+  border: 1px solid rgba(0,229,195,0.2);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.intro-title {
+  font-size: clamp(36px, 8vw, 72px);
+  font-weight: 900;
+  line-height: 1.0;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #fff 0%, var(--teal) 50%, var(--blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.intro-sub {
+  font-size: 18px;
+  color: var(--muted);
+  font-weight: 300;
+  margin-bottom: 56px;
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+.model-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 56px;
+  max-width: 600px;
+}
+
+.pill {
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid;
+  letter-spacing: 0.3px;
+  animation: pillFloat 3s ease-in-out infinite;
+}
+.pill:nth-child(1) { color: var(--teal); border-color: rgba(0,229,195,0.3); background: rgba(0,229,195,0.06); animation-delay: 0s; }
+.pill:nth-child(2) { color: var(--orange); border-color: rgba(255,140,56,0.3); background: rgba(255,140,56,0.06); animation-delay: 0.4s; }
+.pill:nth-child(3) { color: var(--blue); border-color: rgba(61,142,255,0.3); background: rgba(61,142,255,0.06); animation-delay: 0.8s; }
+.pill:nth-child(4) { color: var(--gold); border-color: rgba(255,209,102,0.3); background: rgba(255,209,102,0.06); animation-delay: 1.2s; }
+.pill:nth-child(5) { color: var(--red); border-color: rgba(255,69,96,0.3); background: rgba(255,69,96,0.06); animation-delay: 1.6s; }
+
+@keyframes pillFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.stats-row {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  margin-bottom: 48px;
+}
+
+.stat {
+  text-align: center;
+}
+.stat-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--teal);
+  display: block;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-start {
+  background: linear-gradient(135deg, var(--teal), var(--blue));
+  border: none;
+  border-radius: 16px;
+  padding: 20px 56px;
+  font-family: 'Geologica', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0A0E1A;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.btn-start::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.btn-start:hover::before { opacity: 1; }
+.btn-start:hover { transform: translateY(-3px); box-shadow: 0 20px 60px rgba(0,229,195,0.3); }
+.btn-start:active { transform: translateY(0); }
+
+/* ── GAME ────────────────────────────────────────── */
+#game {
+  flex-direction: column;
+  padding: 0;
+}
+
+/* TOP BAR */
+.top-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(10,14,26,0.8);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress-nums {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.progress-track {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  width: 200px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--blue));
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-center {
+  text-align: center;
+}
+
+.score-label-top {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.score-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--teal);
+  line-height: 1;
+}
+
+/* TIMER */
+.timer-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.timer-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.timer-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  transition: color 0.3s;
+}
+.timer-urgent { color: var(--red) !important; }
+.timer-warn { color: var(--orange) !important; }
+
+/* QUESTION AREA */
+.question-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* SCENARIO CARD */
+.scenario-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px 44px;
+  margin-bottom: 32px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.scenario-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--teal), var(--blue), var(--orange));
+}
+
+.scenario-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.scenario-text {
+  font-size: clamp(19px, 3.5vw, 26px);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.scenario-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.hint-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--orange);
+  flex-shrink: 0;
+}
+
+/* ANSWER GRID */
+.answer-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 700px) {
+  .answer-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.answer-btn {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 12px;
+  cursor: pointer;
+  font-family: 'Geologica', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  line-height: 1.3;
+  position: relative;
+  overflow: hidden;
+}
+
+.answer-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.answer-btn:hover:not(:disabled) {
+  border-color: var(--teal);
+  color: var(--teal);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,229,195,0.15);
+}
+
+.answer-btn:hover:not(:disabled)::before {
+  background: radial-gradient(ellipse at center, rgba(0,229,195,0.08), transparent);
+  opacity: 1;
+}
+
+.answer-btn.correct {
+  border-color: var(--green);
+  background: rgba(0,200,150,0.1);
+  color: var(--green);
+  animation: correctPop 0.4s ease;
+}
+
+.answer-btn.wrong {
+  border-color: var(--red);
+  background: rgba(255,69,96,0.08);
+  color: var(--red);
+  animation: shake 0.35s ease;
+}
+
+.answer-btn.reveal {
+  border-color: rgba(0,200,150,0.4);
+  background: rgba(0,200,150,0.06);
+  color: rgba(0,200,150,0.6);
+}
+
+.answer-btn:disabled { cursor: default; }
+
+.answer-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+@keyframes correctPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%  { transform: translateX(-6px); }
+  40%  { transform: translateX(6px); }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px); }
+}
+
+/* FEEDBACK */
+.feedback-box {
+  width: 100%;
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: none;
+  animation: fadeUp 0.35s ease forwards;
+}
+.feedback-box.show { display: flex; gap: 16px; align-items: flex-start; }
+
+.feedback-correct {
+  background: rgba(0,200,150,0.08);
+  border: 1px solid rgba(0,200,150,0.25);
+}
+.feedback-wrong {
+  background: rgba(255,69,96,0.06);
+  border: 1px solid rgba(255,69,96,0.2);
+}
+
+.feedback-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+
+.feedback-body { flex: 1; }
+.feedback-result {
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.feedback-correct .feedback-result { color: var(--green); }
+.feedback-wrong .feedback-result { color: var(--red); }
+
+.feedback-text {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.feedback-text strong { color: var(--text); font-weight: 700; }
+
+.feedback-points {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.pts-correct { color: var(--green); }
+.pts-wrong { color: var(--muted); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* NEXT BTN */
+.next-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.btn-next {
+  background: transparent;
+  border: 2px solid var(--teal);
+  border-radius: 12px;
+  padding: 14px 36px;
+  font-family: 'Geologica', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--teal);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+.btn-next:hover {
+  background: var(--teal);
+  color: #0A0E1A;
+  box-shadow: 0 8px 32px rgba(0,229,195,0.3);
+}
+.btn-next.show { display: flex; animation: fadeUp 0.3s ease; }
+
+/* STREAK */
+.streak-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  background: rgba(255,209,102,0.06);
+  border: 1px solid rgba(255,209,102,0.15);
+  border-radius: 100px;
+  margin-bottom: 20px;
+  display: none;
+}
+.streak-bar.show { display: flex; animation: fadeUp 0.3s ease; }
+.streak-fire { font-size: 20px; }
+.streak-text { font-size: 13px; font-weight: 700; color: var(--gold); }
+
+/* ── RESULTS ─────────────────────────────────────── */
+#results {
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.results-glow {
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  margin: 0 auto 32px;
+  position: relative;
+}
+.results-glow::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: pulse 2s ease-in-out infinite;
+}
+.glow-gold::before { background: radial-gradient(var(--gold), transparent); }
+.glow-teal::before { background: radial-gradient(var(--teal), transparent); }
+.glow-blue::before { background: radial-gradient(var(--blue), transparent); }
+.glow-red::before  { background: radial-gradient(var(--red), transparent); }
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.15); opacity: 0.5; }
+}
+
+.results-title {
+  font-size: clamp(32px, 6vw, 56px);
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.results-subtitle {
+  font-size: 16px;
+  color: var(--muted);
+  margin-bottom: 48px;
+}
+
+.results-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.res-stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px 28px;
+  min-width: 130px;
+}
+.res-stat-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 36px;
+  font-weight: 700;
+  display: block;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.res-stat-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.results-breakdown {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto 36px;
+  text-align: left;
+}
+
+.breakdown-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.breakdown-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.breakdown-row:last-child { border-bottom: none; }
+.bd-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  width: 20px;
+  font-weight: 700;
+}
+.bd-model {
+  flex: 1;
+  font-weight: 600;
+  color: var(--text);
+}
+.bd-pts {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+}
+.pts-ok { color: var(--green); }
+.pts-no { color: var(--muted); }
+.bd-icon { font-size: 16px; }
+
+.btn-restart {
+  background: linear-gradient(135deg, var(--teal), var(--blue));
+  border: none;
+  border-radius: 14px;
+  padding: 18px 48px;
+  font-family: 'Geologica', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0A0E1A;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-right: 12px;
+}
+.btn-restart:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 48px rgba(0,229,195,0.3);
+}
+
+.btn-home {
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 32px;
+  font-family: 'Geologica', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-home:hover { border-color: var(--text); color: var(--text); }
+
+/* BONUS ANIM */
+.bonus-flash {
+  position: fixed;
+  top: 80px; right: 24px;
+  background: var(--gold);
+  color: #0A0E1A;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 10px 20px;
+  border-radius: 100px;
+  z-index: 200;
+  pointer-events: none;
+  animation: bonusPop 1.5s ease forwards;
+}
+
+@keyframes bonusPop {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.8); }
+  20%  { opacity: 1; transform: translateY(0) scale(1.1); }
+  40%  { transform: scale(1); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* CONFETTI */
+.confetti-piece {
+  position: fixed;
+  width: 8px; height: 12px;
+  border-radius: 2px;
+  top: -20px;
+  animation: confettiFall linear forwards;
+  z-index: 300;
+  pointer-events: none;
+}
+@keyframes confettiFall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ INTRO ══════════════════════════════════════════════ -->
+<div id="intro" class="screen active">
+  <div class="intro-badge">
+    <span>🎯</span> Мастер-класс · Игра 1
+  </div>
+
+  <div class="intro-title">Угадай<br>бизнес-модель</div>
+  <div class="intro-sub">
+    10 реальных сценариев. Слушаешь описание — выбираешь тип модели.<br>Чем быстрее — тем больше очков.
+  </div>
+
+  <div class="model-pills">
+    <div class="pill">📋 Подписка</div>
+    <div class="pill">🛒 Разовые продажи</div>
+    <div class="pill">🏪 Маркетплейс</div>
+    <div class="pill">🆓 Freemium</div>
+    <div class="pill">📜 Лицензия</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat">
+      <span class="stat-val">10</span>
+      <span class="stat-label">вопросов</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val">15с</span>
+      <span class="stat-label">на ответ</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val">100</span>
+      <span class="stat-label">макс. очков</span>
+    </div>
+  </div>
+
+  <button class="btn-start" onclick="startGame()">
+    Начать игру →
+  </button>
+</div>
+
+<!-- ══ GAME ════════════════════════════════════════════════ -->
+<div id="game" class="screen">
+  <div class="top-bar">
+    <div class="progress-wrap">
+      <div class="progress-nums" id="progress-nums">Вопрос 1 из 10</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="score-center">
+      <div class="score-label-top">Очки</div>
+      <div class="score-number" id="score-display">0</div>
+    </div>
+
+    <div class="timer-wrap">
+      <div class="timer-label">Время</div>
+      <div class="timer-display" id="timer-display">15</div>
+    </div>
+  </div>
+
+  <div class="question-area">
+    <div class="streak-bar" id="streak-bar">
+      <span class="streak-fire">🔥</span>
+      <span class="streak-text" id="streak-text">Серия: 2 подряд!</span>
+    </div>
+
+    <div class="scenario-card" id="scenario-card">
+      <div class="scenario-num" id="scenario-num">СЦЕНАРИЙ 01 / 10</div>
+      <div class="scenario-text" id="scenario-text"></div>
+      <div class="scenario-hint">
+        <div class="hint-dot"></div>
+        <span id="scenario-hint"></span>
+      </div>
+    </div>
+
+    <div class="answer-grid" id="answer-grid"></div>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-icon" id="feedback-icon"></div>
+      <div class="feedback-body">
+        <div class="feedback-result" id="feedback-result"></div>
+        <div class="feedback-text" id="feedback-text"></div>
+      </div>
+      <div class="feedback-points" id="feedback-points"></div>
+    </div>
+
+    <div class="next-wrap">
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()">
+        <span>Следующий</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RESULTS ══════════════════════════════════════════════ -->
+<div id="results" class="screen">
+  <div class="results-glow" id="results-glow"></div>
+  <div class="results-title" id="results-title"></div>
+  <div class="results-subtitle" id="results-subtitle"></div>
+
+  <div class="results-stats">
+    <div class="res-stat">
+      <span class="res-stat-val" id="res-score" style="color:var(--teal)">0</span>
+      <div class="res-stat-label">Очки</div>
+    </div>
+    <div class="res-stat">
+      <span class="res-stat-val" id="res-correct" style="color:var(--green)">0/10</span>
+      <div class="res-stat-label">Правильно</div>
+    </div>
+    <div class="res-stat">
+      <span class="res-stat-val" id="res-best-streak" style="color:var(--gold)">0</span>
+      <div class="res-stat-label">Лучшая серия</div>
+    </div>
+  </div>
+
+  <div class="results-breakdown">
+    <div class="breakdown-title">Разбор вопросов</div>
+    <div id="breakdown-rows"></div>
+  </div>
+
+  <div>
+    <button class="btn-restart" onclick="startGame()">Сыграть снова</button>
+    <button class="btn-home" onclick="goIntro()">На главную</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+const MODELS = [
+  { name: 'Подписка',       icon: '📋', color: '#00E5C3' },
+  { name: 'Разовые продажи',icon: '🛒', color: '#FF8C38' },
+  { name: 'Маркетплейс',   icon: '🏪', color: '#3D8EFF' },
+  { name: 'Freemium',       icon: '🆓', color: '#FFD166' },
+  { name: 'Лицензия',       icon: '📜', color: '#FF4560' },
+];
+
+const ALL_QUESTIONS = [
+  {
+    scenario: '«Плачу 2 990 ₸ в месяц — смотрю фильмы и сериалы без рекламы и без ограничений»',
+    hint: 'Платёж регулярный, независимо от количества просмотров',
+    answer: 'Подписка',
+    explanation: '<strong>Подписка</strong> — клиент платит периодически за доступ. Предсказуемый доход. Главная метрика — MRR и отток (churn). Примеры: Netflix, Spotify, 1С.',
+    example: 'Netflix, Spotify, Kaspersky'
+  },
+  {
+    scenario: '«Разместила товар на платформе, продала сумку за 35 000 ₸ — платформа взяла 12%»',
+    hint: 'Платформа ничего не производит — зарабатывает на транзакциях',
+    answer: 'Маркетплейс',
+    explanation: '<strong>Маркетплейс</strong> — платформа соединяет продавца и покупателя, берёт комиссию. Чем больше сделок — тем больше доход.',
+    example: 'Kaspi.kz, OLX, Wildberries, Airbnb'
+  },
+  {
+    scenario: '«Созваниваюсь в Zoom до 40 минут бесплатно. Хочу больше — плати за Pro»',
+    hint: 'Сначала дают попробовать бесплатно, потом предлагают заплатить',
+    answer: 'Freemium',
+    explanation: '<strong>Freemium</strong> — базово бесплатно, расширенно платно. Конверсия обычно 2–5%. Работает когда переменная стоимость одного пользователя близка к нулю.',
+    example: 'Zoom, Dropbox, Notion, Canva'
+  },
+  {
+    scenario: '«Сделал сайт для клиента, сдал — получил 150 000 ₸. Следующий заказ ищу сам»',
+    hint: 'Деньги приходят одноразово за выполненную работу',
+    answer: 'Разовые продажи',
+    explanation: '<strong>Разовые продажи</strong> — классика агентств и фриланса. Нестабильный доход, зависит от потока заказов. Решение: предоплаты и ретейнеры.',
+    example: 'Веб-студии, консалтинг, ивент-агентства'
+  },
+  {
+    scenario: '«Открыл кофейню по франшизе — плачу роялти 5% с оборота каждый месяц»',
+    hint: 'Платишь за право использовать бренд и технологию другой компании',
+    answer: 'Лицензия',
+    explanation: '<strong>Лицензия / роялти</strong> — платишь за право использовать продукт, бренд или технологию. Франшиза — это лицензия на бизнес-модель.',
+    example: 'Франшизы, Microsoft Office, патенты в фарме'
+  },
+  {
+    scenario: '«В приложении базовые функции — бесплатно. Безлимитное облако — 990 ₸ в месяц»',
+    hint: 'Два уровня доступа: бесплатный базовый и платный расширенный',
+    answer: 'Freemium',
+    explanation: '<strong>Freemium с подпиской</strong> — Dropbox, Google Drive, Notion работают именно так. Цель: создать привычку на бесплатном, потом конвертировать в платного.',
+    example: 'Dropbox, iCloud, Google One'
+  },
+  {
+    scenario: '«Наше ПО стоит 60 000 ₸ в год на одну компанию — устанавливай и пользуйся»',
+    hint: 'Компания покупает право пользоваться программой определённый срок',
+    answer: 'Лицензия',
+    explanation: '<strong>Лицензия</strong> — Microsoft, 1С, антивирусы. Бизнес создаёт продукт один раз, продаёт право на него многократно. Высокая маржинальность.',
+    example: '1С, Microsoft Office, AutoCAD'
+  },
+  {
+    scenario: '«Водитель выполнил 10 поездок через приложение — платформа взяла 20% с каждой»',
+    hint: 'Платформа берёт процент с каждой сделки между двумя сторонами',
+    answer: 'Маркетплейс',
+    explanation: '<strong>Маркетплейс</strong> — Uber, Яндекс.Такси, Delivery Club соединяют водителей и пассажиров. Платформа сама не едет — только сводит стороны.',
+    example: 'Uber, Яндекс.Такси, inDriver'
+  },
+  {
+    scenario: '«Слушаю музыку бесплатно, но каждые 3 трека — реклама. Могу заплатить, чтобы убрать»',
+    hint: 'Бесплатно для пользователя — но кто-то всё равно платит платформе',
+    answer: 'Freemium',
+    explanation: '<strong>Freemium с рекламой</strong> — пользователь не платит, но смотрит рекламу. Рекламодатель — настоящий клиент платформы. Подписка убирает рекламу.',
+    example: 'Spotify Free, YouTube, Yandex Music'
+  },
+  {
+    scenario: '«Разработали CRM-систему для логистической компании — одним платежом 800 000 ₸»',
+    hint: 'Заказ выполнен — деньги получены — ищем следующего клиента',
+    answer: 'Разовые продажи',
+    explanation: '<strong>Разовые продажи</strong> — проектный бизнес. Стабильность достигается через ретейнеры: ежемесячная оплата за поддержку. Иначе — «американские горки» с кассой.',
+    example: 'IT-интеграторы, консалтинговые проекты'
+  },
+];
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let questions = [];
+let current = 0;
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let answered = false;
+let timerInterval = null;
+let timeLeft = 15;
+let history = [];
+
+// ══════════════════════════════════════════════════
+// FLOW
+// ══════════════════════════════════════════════════
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goIntro() {
+  clearTimer();
+  showScreen('intro');
+}
+
+function startGame() {
+  questions = shuffle(ALL_QUESTIONS);
+  current = 0; score = 0; streak = 0; bestStreak = 0; history = [];
+  showScreen('game');
+  renderQuestion();
+}
+
+// ══════════════════════════════════════════════════
+// RENDER QUESTION
+// ══════════════════════════════════════════════════
+function renderQuestion() {
+  const q = questions[current];
+  answered = false;
+
+  // Progress
+  const pct = (current / questions.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-nums').textContent = `Вопрос ${current + 1} из ${questions.length}`;
+  document.getElementById('scenario-num').textContent =
+    `СЦЕНАРИЙ ${String(current+1).padStart(2,'0')} / ${questions.length}`;
+
+  // Card entrance
+  const card = document.getElementById('scenario-card');
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(16px)';
+  setTimeout(() => {
+    card.style.transition = 'all 0.4s cubic-bezier(0.4,0,0.2,1)';
+    card.style.opacity = '1';
+    card.style.transform = 'translateY(0)';
+  }, 50);
+
+  document.getElementById('scenario-text').textContent = q.scenario;
+  document.getElementById('scenario-hint').textContent = q.hint;
+
+  // Streak
+  const sb = document.getElementById('streak-bar');
+  if (streak >= 2) {
+    sb.classList.add('show');
+    document.getElementById('streak-text').textContent =
+      `🔥 Серия ${streak} подряд! +${streak * 5} бонус`;
+  } else {
+    sb.classList.remove('show');
+  }
+
+  // Feedback reset
+  const fb = document.getElementById('feedback-box');
+  fb.classList.remove('show', 'feedback-correct', 'feedback-wrong');
+  document.getElementById('btn-next').classList.remove('show');
+
+  // Answers — shuffled
+  const shuffledModels = shuffle(MODELS);
+  const grid = document.getElementById('answer-grid');
+  grid.innerHTML = shuffledModels.map((m, i) => `
+    <button class="answer-btn" onclick="selectAnswer('${m.name}', this)"
+      style="animation-delay:${i * 0.06}s; animation: fadeUp 0.35s ease ${i*0.06}s both">
+      <span class="answer-icon">${m.icon}</span>
+      <span>${m.name}</span>
+    </button>
+  `).join('');
+
+  // Timer
+  startTimer();
+}
+
+// ══════════════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════════════
+function startTimer() {
+  clearTimer();
+  timeLeft = 15;
+  updateTimerDisplay();
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearTimer();
+      if (!answered) timeOut();
+    }
+  }, 1000);
+}
+
+function clearTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timer-display');
+  el.textContent = timeLeft;
+  el.className = 'timer-display';
+  if (timeLeft <= 5) el.classList.add('timer-urgent');
+  else if (timeLeft <= 8) el.classList.add('timer-warn');
+}
+
+function timeOut() {
+  answered = true;
+  const q = questions[current];
+  streak = 0;
+
+  // Reveal correct answer
+  document.querySelectorAll('.answer-btn').forEach(btn => {
+    btn.disabled = true;
+    const name = btn.querySelector('span:last-child').textContent;
+    if (name === q.answer) btn.classList.add('reveal');
+    else btn.style.opacity = '0.3';
+  });
+
+  showFeedback(false, 0, '⏱ Время вышло! ', q.explanation, true);
+  history.push({ q, correct: false, pts: 0 });
+}
+
+// ══════════════════════════════════════════════════
+// ANSWER
+// ══════════════════════════════════════════════════
+function selectAnswer(chosen, el) {
+  if (answered) return;
+  answered = true;
+  clearTimer();
+
+  const q = questions[current];
+  const correct = chosen === q.answer;
+
+  // Score: base 10 + time bonus
+  const pts = correct ? (10 + Math.floor(timeLeft * 5 / 15 * 5)) : 0;
+  const streakBonus = correct && streak >= 2 ? streak * 5 : 0;
+  const totalPts = pts + streakBonus;
+
+  // Visual feedback on buttons
+  document.querySelectorAll('.answer-btn').forEach(btn => {
+    btn.disabled = true;
+    const name = btn.querySelector('span:last-child').textContent;
+    if (name === q.answer) btn.classList.add('correct');
+    else if (btn === el && !correct) btn.classList.add('wrong');
+    else btn.style.opacity = '0.3';
+  });
+
+  if (correct) {
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+    score += totalPts;
+    document.getElementById('score-display').textContent = score;
+
+    if (streakBonus > 0) showBonus(`+${streakBonus} бонус!`);
+    if (score % 50 === 0 && score > 0) launchConfetti();
+  } else {
+    streak = 0;
+  }
+
+  history.push({ q, correct, pts: totalPts });
+  showFeedback(correct, totalPts, correct ? '✅ Правильно!' : '❌ Не совсем.', q.explanation, false);
+}
+
+function showFeedback(correct, pts, prefix, explanation, timeout) {
+  const fb = document.getElementById('feedback-box');
+  fb.classList.add('show', correct ? 'feedback-correct' : 'feedback-wrong');
+
+  document.getElementById('feedback-icon').textContent = timeout ? '⏱' : correct ? '🎯' : '💡';
+  document.getElementById('feedback-result').textContent = prefix + (timeout ? questions[current].answer : '');
+  document.getElementById('feedback-text').innerHTML = explanation;
+  document.getElementById('feedback-points').textContent = pts > 0 ? `+${pts}` : '0';
+  document.getElementById('feedback-points').className = 'feedback-points ' + (pts > 0 ? 'pts-correct' : 'pts-wrong');
+
+  setTimeout(() => {
+    document.getElementById('btn-next').classList.add('show');
+  }, 300);
+}
+
+// ══════════════════════════════════════════════════
+// NEXT / RESULTS
+// ══════════════════════════════════════════════════
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    showResults();
+  } else {
+    const card = document.getElementById('scenario-card');
+    card.style.transition = 'all 0.25s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(-20px)';
+    setTimeout(renderQuestion, 200);
+  }
+}
+
+function showResults() {
+  clearTimer();
+  showScreen('results');
+
+  const correct = history.filter(h => h.correct).length;
+  const pct = Math.round(correct / questions.length * 100);
+
+  let emoji, glowClass, title, sub;
+  if (pct === 100) {
+    emoji = '🏆'; glowClass = 'glow-gold'; title = 'Легенда!';
+    sub = 'Все 10 правильно! Ты знаешь бизнес-модели лучше, чем большинство предпринимателей.';
+  } else if (pct >= 80) {
+    emoji = '🎯'; glowClass = 'glow-teal'; title = 'Отлично!';
+    sub = `${pct}% правильных — очень сильный результат. Пара вопросов для роста.`;
+  } else if (pct >= 60) {
+    emoji = '👍'; glowClass = 'glow-blue'; title = 'Хорошо!';
+    sub = `${pct}% правильных — базовое понимание есть. Разбери ошибки и повтори!`;
+  } else {
+    emoji = '📚'; glowClass = 'glow-red'; title = 'Нужна практика';
+    sub = `${pct}% правильных — бизнес-модели требуют внимания. Сыграй ещё раз!`;
+  }
+
+  const glow = document.getElementById('results-glow');
+  glow.textContent = emoji;
+  glow.className = 'results-glow ' + glowClass;
+
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-subtitle').textContent = sub;
+  document.getElementById('res-score').textContent = score;
+  document.getElementById('res-correct').textContent = `${correct}/10`;
+  document.getElementById('res-best-streak').textContent = bestStreak;
+
+  const rows = document.getElementById('breakdown-rows');
+  rows.innerHTML = history.map((h, i) => `
+    <div class="breakdown-row">
+      <div class="bd-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="bd-model">${h.q.answer}</div>
+      <div class="bd-icon">${h.correct ? '✅' : '❌'}</div>
+      <div class="bd-pts ${h.correct ? 'pts-ok' : 'pts-no'}">
+        ${h.correct ? '+' + h.pts : '0'}
+      </div>
+    </div>
+  `).join('');
+
+  if (pct === 100) launchConfetti();
+}
+
+// ══════════════════════════════════════════════════
+// FX
+// ══════════════════════════════════════════════════
+function showBonus(text) {
+  const el = document.createElement('div');
+  el.className = 'bonus-flash';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+
+function launchConfetti() {
+  const colors = ['#00E5C3','#FF8C38','#FFD166','#3D8EFF','#FF4560','#00C896'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      el.style.animationDelay = Math.random() * 0.5 + 's';
+      el.style.transform = `rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i * 30);
+  }
+}
+</script>
+</body>
+</html>
